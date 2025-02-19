@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for
 from gmail.google_auth import authenticate
 from gmail.read_emails import read_emails
+from Agent.parent_agent import Agent 
 
 app = Flask(__name__)
 
@@ -20,7 +21,10 @@ def authorize():
 def emails():
     read_emails()
     print('reading email')
-    return 'Emails retrieved'
+    return read_emails() 
+
+
+
 
 if __name__ == '__main__':
     app.run()
