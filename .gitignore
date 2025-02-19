@@ -1,6 +1,6 @@
 .env
-token.json
-credentials.json
+gmail/token.json
+gmail/credentials.json
 .DS_Store
 __pycache__/
 debug.log
