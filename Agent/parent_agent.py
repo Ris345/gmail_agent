@@ -4,7 +4,7 @@ import os.path
 import logging
 from dotenv import load_dotenv
 import datetime 
-from SetInterval.setinterval import setInterval
+from Agent.SetInterval.setinterval import setInterval
 import requests 
 
 

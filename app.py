@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, jsonify
 from gmail.google_auth import authenticate
 from gmail.read_emails import read_emails
 from Agent.parent_agent import Agent 
@@ -19,9 +19,9 @@ def authorize():
 
 @app.route('/retrieveEmails', methods=['GET'])
 def emails():
-    read_emails()
+    result = read_emails()
     print('reading email')
-    return read_emails() 
+    return jsonify(result)
 
 
 
