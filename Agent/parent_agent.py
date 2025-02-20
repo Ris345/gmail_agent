@@ -3,48 +3,57 @@ from agno.models.openai import OpenAIChat
 import os.path
 import logging
 from dotenv import load_dotenv
-import datetime 
+import datetime
 from Agent.SetInterval.setinterval import setInterval
-import requests 
+import requests
 
-
-# agent work flow 
+# Define your functions
 def check_mail():
-    """ agent is going to check your email periodically 2 days it is 
-    going to check both inbox and spam if the agent finds spam related data agent performs the deletetion function autonoously"""
-
-    # basically need to use the date and time methods to invoke these functions 
-    # intialize a hour variable to track the time hour 
-    # threshold would be 48 hrs 
-    # after each hour passes the hour needs to increment the hour 
-    # so basically we are creating 48 hour timer that resets everytime it completes 
-    # instead of invoking the read_email func for here we will make a get req here  
+    """
+    Agent checks emails periodically every 2 days.
+    It checks both inbox and spam, and autonomously deletes spam-related content.
+    """
+    # Make the API request to retrieve emails
     url = 'http://127.0.0.1:5000/retrieveEmails'
     response = requests.get(url)
-
+    
     if response.status_code == 200:
-        data = response.json()  # If the response is JSON
-        print(data)
+        emails = response.json()
+        return emails
     else:
-        print(f"Error: {response.status_code}")
+        return f"Error retrieving emails: {response.status_code}"
+    
 
-# this func simply invokes the func every 3 days 
-setInterval(check_mail, 259200000)
-
-def remove_junk():
-    """After identifying the junk agent will perform a deletion action to remove all the junk email"""
-    print('deleting junk')
+def trash_cleaner():
+    print("Cleaning your trash automatically!")
 
 
-# agent = Agent(
-#     model=OpenAIChat(id="gpt-4o"),
-#     description="How can agents invoke the function calling from tools.",
-#     tools=[check_mail, remove_junk],
-#     show_tool_calls=True,
-#     markdown=True
-# )
+def remove_junk(email_ids):
+    """
+    After identifying junk emails, agent performs deletion to remove them.
+    
+    Args:
+        email_ids: List of email IDs to delete
+    """
+    # You could implement an API call to delete the emails
+    url = 'http://127.0.0.1:5000/deleteEmails'
+    response = requests.post(url, json={"email_ids": email_ids})
+    
+    if response.status_code == 200:
+        return f"Successfully deleted {len(email_ids)} junk emails"
+    else:
+        return f"Error deleting emails: {response.status_code}"
+
+# Initialize the agent with the tools
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    description="Email spam detection and cleanup agent",
+    tools=[check_mail, remove_junk],
+    show_tool_calls=True,
+    markdown=True
+)
 
 
-# agent.print_response("Look at these functions and tell me how I can make my spam cleaner successfull", stream=True)
 
+setInterval(check_mail, 5)  
 

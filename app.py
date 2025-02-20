@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, jsonify
 from gmail.google_auth import authenticate
 from gmail.read_emails import read_emails
-from Agent.parent_agent import Agent 
+
 
 app = Flask(__name__)
 
@@ -22,7 +22,6 @@ def emails():
     result = read_emails()
     print('reading email')
     return jsonify(result)
-
 
 
 
