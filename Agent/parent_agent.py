@@ -4,8 +4,11 @@ import os.path
 import logging
 from dotenv import load_dotenv
 import datetime
-from Agent.SetInterval.setinterval import setInterval
 import requests
+import time 
+from apscheduler.schedulers.background import BackgroundScheduler
+import time
+
 
 # Define your functions
 def check_mail():
@@ -43,17 +46,24 @@ def remove_junk(email_ids):
         return f"Successfully deleted {len(email_ids)} junk emails"
     else:
         return f"Error deleting emails: {response.status_code}"
+    
 
-# Initialize the agent with the tools
 agent = Agent(
     model=OpenAIChat(id="gpt-4o"),
     description="Email spam detection and cleanup agent",
-    tools=[check_mail, remove_junk],
+    tools=[check_mail, remove_junk, trash_cleaner],
     show_tool_calls=True,
     markdown=True
 )
 
+agent.print_response("Look at these functions and tell me how I can make my spam cleaner successful", stream=True)
 
 
-setInterval(check_mail, 5)  
+# agent gets called automatically every 3 days 
+scheduler = BackgroundScheduler()
+scheduler.start()
+scheduler.add_job(agent.run, 'interval', days=3)
+
+print('scheduled successfully!',scheduler)
+
 

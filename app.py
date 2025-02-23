@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, jsonify
 from gmail.google_auth import authenticate
 from gmail.read_emails import read_emails
+from Agent.parent_agent import agent, scheduler, invoke_agent 
 
 
 app = Flask(__name__)
@@ -24,6 +25,6 @@ def emails():
     return jsonify(result)
 
 
-
 if __name__ == '__main__':
+    invoke_agent() 
     app.run()
