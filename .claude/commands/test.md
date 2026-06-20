@@ -3,7 +3,7 @@
 Runs the project's pytest suite and reports results.
 
 ```bash
-cd /Users/rishavacharya/Desktop/gmail_agent && python -m pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 After running, report:

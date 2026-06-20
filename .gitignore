@@ -1,7 +1,11 @@
 .env
 gmail/token.json
-gmail/credentials.json
+credentials.json
 .DS_Store
+.coverage
+.coverage.*
 __pycache__/
 debug.log
+data/settings.db
+data/agent_log.jsonl
 .venv
