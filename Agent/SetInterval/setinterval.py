@@ -10,12 +10,12 @@ class IntervalNotValid(Exception):
 
 
 class setInterval():
-    def __init__(this, func=None, sec=None, args=[], autostart=True):
+    def __init__(this, func=None, sec=None, args=None, autostart=True):
         this.running = False
         this.func = func  # the function to be run
         this.sec = sec            # interval in second
         this.Return = None  # The returned data
-        this.args = args
+        this.args = args if args is not None else []
         this.runOnce = None  # asociated with run_once() method
         this.runOnceArgs = None   # asociated with run_once() method
 
@@ -44,6 +44,7 @@ class setInterval():
 
     def stop(this):
         this.running = False
+        this.TIMER.cancel()
 
     def isValid(this):
         if (not callable(this.func)):
@@ -99,22 +100,21 @@ class setInterval():
 
         this.sec = sec
 
-    def change_func(this, func, args=[]):
+    def change_func(this, func, args=None):
 
         if (not callable(func)):
             raise TypeError("non-callable object is given")
 
         this.func = func
 
-        if args is not None:
-            this.args = args
+        this.args = args if args is not None else []
 
-    def change_argument(this, newArgument=[]):
-        this.args = newArgument
+    def change_argument(this, newArgument=None):
+        this.args = newArgument if newArgument is not None else []
 
-    def run_once(this, func, args=[]):
+    def run_once(this, func, args=None):
         this.runOnce = func
-        this.runOnceArgs = args
+        this.runOnceArgs = args if args is not None else []
 
     def get_return(this):
         return this.Return

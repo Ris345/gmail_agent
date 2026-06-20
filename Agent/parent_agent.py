@@ -1,13 +1,9 @@
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
-import os.path
-import logging
 from dotenv import load_dotenv
-import datetime
 import requests
-import time 
 from apscheduler.schedulers.background import BackgroundScheduler
-import time
+from evals.evaluator import evaluate_emails
 
 
 # Define your functions
@@ -18,52 +14,69 @@ def check_mail():
     """
     # Make the API request to retrieve emails
     url = 'http://127.0.0.1:5000/retrieveEmails'
-    response = requests.get(url)
-    
+    try:
+        response = requests.get(url, timeout=10)
+    except requests.exceptions.RequestException as e:
+        return f"Error reaching email server: {e}"
     if response.status_code == 200:
-        emails = response.json()
-        return emails
-    else:
-        return f"Error retrieving emails: {response.status_code}"
+        return response.json()
+    return f"Error retrieving emails: {response.status_code}"
     
 
 def trash_cleaner():
     print("Cleaning your trash automatically!")
 
 
-def remove_junk(email_ids):
+def remove_junk(emails: list) -> str:
     """
-    After identifying junk emails, agent performs deletion to remove them.
-    
+    Evaluates emails for spam and deletes only confirmed spam.
+    Emails that do not pass the spam eval are never deleted.
+
     Args:
-        email_ids: List of email IDs to delete
+        emails: List of email dicts with keys: id, sender, subject, body
+                (as returned by check_mail)
     """
-    # You could implement an API call to delete the emails
+    approved_ids, rejected_ids = evaluate_emails(emails)
+
+    if rejected_ids:
+        print(f"Eval rejected {len(rejected_ids)} emails (not confident enough to delete): {rejected_ids}")
+
+    if not approved_ids:
+        return "No emails passed the spam eval — nothing deleted."
+
     url = 'http://127.0.0.1:5000/deleteEmails'
-    response = requests.post(url, json={"email_ids": email_ids})
-    
+    try:
+        response = requests.post(url, json={"email_ids": approved_ids}, timeout=10)
+    except requests.exceptions.RequestException as e:
+        return f"Error reaching email server: {e}"
     if response.status_code == 200:
-        return f"Successfully deleted {len(email_ids)} junk emails"
-    else:
-        return f"Error deleting emails: {response.status_code}"
+        return f"Deleted {len(approved_ids)} spam emails. {len(rejected_ids)} emails were kept (did not pass eval)."
+    return f"Error deleting emails: {response.status_code}"
     
 
-agent = Agent(
-    model=OpenAIChat(id="gpt-4o"),
-    description="Email spam detection and cleanup agent",
-    tools=[check_mail, remove_junk, trash_cleaner],
-    show_tool_calls=True,
-    markdown=True
-)
-
-agent.print_response("Look at these functions and tell me how I can make my spam cleaner successful", stream=True)
+agent = None
+scheduler = None
 
 
-# agent gets called automatically every 3 days 
-scheduler = BackgroundScheduler()
-scheduler.start()
-scheduler.add_job(agent.run, 'interval', days=3)
+def invoke_agent():
+    global agent, scheduler
+    load_dotenv()
 
-print('scheduled successfully!',scheduler)
+    agent = Agent(
+        model=OpenAIChat(id="gpt-4o"),
+        description="Email spam detection and cleanup agent",
+        tools=[check_mail, remove_junk, trash_cleaner],
+        markdown=True,
+    )
+
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(
+        agent.run,
+        "interval",
+        days=3,
+        kwargs={"message": "Check my Gmail inbox for spam and junk emails. Identify them using check_mail, then remove them using remove_junk."},
+    )
+    print("scheduled successfully!", scheduler)
 
 

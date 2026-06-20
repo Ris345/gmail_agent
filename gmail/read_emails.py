@@ -1,14 +1,12 @@
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-import os
 import base64
 import email
-from datetime import datetime
-import html
+from gmail.google_auth import SCOPES
+
 
 def read_emails():
-    # Load credentials from token.json
-    creds = Credentials.from_authorized_user_file("gmail/token.json", ["https://www.googleapis.com/auth/gmail.readonly"])
+    creds = Credentials.from_authorized_user_file("gmail/token.json", SCOPES)
     
     # Build the Gmail API service
     service = build('gmail', 'v1', credentials=creds)
@@ -73,6 +71,22 @@ def read_emails():
         'count': len(emails_data),
         'emails': emails_data
     }
+
+def delete_emails(email_ids):
+    creds = Credentials.from_authorized_user_file("gmail/token.json", SCOPES)
+    service = build('gmail', 'v1', credentials=creds)
+
+    trashed = []
+    errors = []
+    for email_id in email_ids:
+        try:
+            service.users().messages().trash(userId='me', id=email_id).execute()
+            trashed.append(email_id)
+        except Exception as e:
+            errors.append({"id": email_id, "error": str(e)})
+
+    return {"status": "success", "trashed": len(trashed), "errors": errors}
+
 
 if __name__ == "__main__":
     result = read_emails()
