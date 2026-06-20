@@ -5,6 +5,7 @@ Flask==2.0.3
 Werkzeug==2.0.3
 apscheduler==3.11.0
 agno
+openai
 python-dotenv
 pytest
 pytest-mock

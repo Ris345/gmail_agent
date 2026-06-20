@@ -13,7 +13,7 @@ def client():
 def test_index_returns_success(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Success" in response.data
+    assert b"Gmail Agent" in response.data
 
 
 @patch("app.read_emails")

@@ -7,24 +7,17 @@ List all available custom slash commands for this project.
 ## /test
 Runs the full pytest suite (`tests/`) and reports pass/fail with output for any failures.
 
-```bash
-python -m pytest tests/ -v
-```
+## /run
+Builds and starts the full Docker stack. Checks Flask startup and APScheduler job registration.
+
+## /authorize
+Triggers the OAuth2 flow and confirms `gmail/token.json` was written.
+
+## /eval
+Runs only the evaluator tests (`tests/test_evaluator.py`) against the spam classification pipeline.
+
+## /check-agent
+Smoke-tests the agent by hitting `/retrieveEmails` and validating the JSON response.
 
 ## /skills
 Shows this list.
-
----
-
-## Useful one-liners (not skills, but handy)
-
-```bash
-# Start the app
-docker compose up --build
-
-# Trigger OAuth and first email read
-curl http://localhost:5000/authorize
-
-# Fetch emails as JSON
-curl http://localhost:5000/retrieveEmails
-```

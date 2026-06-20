@@ -44,7 +44,8 @@ class setInterval():
 
     def stop(this):
         this.running = False
-        this.TIMER.cancel()
+        if hasattr(this, 'TIMER'):
+            this.TIMER.cancel()
 
     def isValid(this):
         if (not callable(this.func)):
